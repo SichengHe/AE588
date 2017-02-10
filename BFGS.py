@@ -11,7 +11,7 @@ class BFGS(object):
     """ main function for hw2 for unconstrained optimization. 
     Implementation of BFGS method.  """
 
-    def __init__(self, f, g, x0, V0, dim_N):
+    def __init__(self, f, g, x0, V0, dim_N, mode):
         
         """Initialization: 
             f: obj
@@ -19,6 +19,7 @@ class BFGS(object):
             x0: initial pt
             V0: initial Hessian (inv)
             dim_N: problem size
+            mode: 0: output x, J; 1: output optimization history and convegrence
             """
         
         # stores the history of x (helps solve for sk and postprocess)
@@ -40,6 +41,9 @@ class BFGS(object):
         
         # dimension
         self.dim_N = dim_N
+
+        # mode
+        self.mode = mode
         
     def gradDescentDir(self):
         
@@ -185,64 +189,28 @@ class BFGS(object):
             g2_norm = self.newton()
             
             j += 1
+
           
         
-        if (1 == 1):
+        if (self.mode == 1):
             
-            n_iter_list = list(xrange(j))
+            self.n_iter_list = list(xrange(j))
             
-            log_g_norm_list = []
+            self.log_g_norm_list = []
 
             for i in xrange(len(self.g_norm_list)):
                 
-                log_g_norm_list.append(np.log10(self.g_norm_list[i]))
-            
-            plt.plot(n_iter_list, log_g_norm_list, '-o')
-            
-            plt.show()
-            
-            
-            
-            
-    def postProcess2D(self, x_low, x_up, Nx, y_low, y_up, Ny):
-        
-        f = self.f
-        
-        x_vec = np.linspace(x_low,x_up,Nx)
-        y_vec = np.linspace(y_low,y_up,Ny)
-        E_mat = np.matrix(np.zeros((Nx,Ny)))
+                self.log_g_norm_list.append(np.log10(self.g_norm_list[i]))
 
-        for i in xrange(Nx):
+            return self.x_list, self.n_iter_list, self.log_g_norm_list
+            
 
-            x_loc = x_vec[i]   
+            
+            
+            
+            
     
-            for j in xrange(Ny):
 
-                y_loc = y_vec[j]
 
-                E_mat[j,i] = f(np.matrix([[x_loc],[y_loc]]))
 
-        print(E_mat)
-    
-        plt.figure()
-        im = plt.imshow(E_mat, interpolation='bilinear', origin='lower',
-                        cmap=cm.gray, extent=(x_low, x_up, y_low, y_up))
-        levels = np.arange(0.0, 5.0, 0.01) # by experiment
-        CS = plt.contour(E_mat, levels,
-                         origin='lower',
-                         linewidths=2,
-                         extent=(x_low, x_up, y_low, y_up))
-        
-        
-        x_list = copy.deepcopy(self.x_list)
-        
-        xx_list = []
-        xy_list = []
-        for i in xrange(len(x_list)):
-            
-            xx_list.append(x_list[i][0,0])
-            xy_list.append(x_list[i][1,0])
-            
-        plt.plot(xx_list, xy_list, '-yo')
-        
-        plt.show()
+
