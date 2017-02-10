@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import BFGS as BFGS
 import trustRegion as TR
+import CG as CG
 
 def Matyas(x):
     
@@ -90,24 +91,21 @@ Nx = 100
 Ny = 100
             
 p1 = BFGS.BFGS(Matyas, Matyas_grad, x0, V0, dim_N, 1)
-x_list, n_iter_list, log_g_norm_list = p1.optimize(10**-12)
+x_list_LS, n_iter_list_LS, log_g_norm_list_LS = p1.optimize(10**-12)
 
-x1_LS, x2_LS = traj(x_list)     
+x1_LS, x2_LS = traj(x_list_LS)     
       
         
         
         
         
         
-B_0 = np.matrix(np.eye(2)) 
-x0 = np.matrix(np.zeros((2,1)))
-x0[0, 0] = 1.0
-x0[1, 0] = 0.3           
+B_0 = np.matrix(np.eye(2))     
 epsilon = 1e-12
         
 Delta_0 = 1.0
 Delta_max = 10.0
-[x_list_TR, gk_norm_list] = TR.trustRegion(Delta_0, Delta_max, epsilon, x0, B_0, Matyas, Matyas_grad, 1)     
+x_list_TR, n_iter_list_TR, log_g_norm_list_TR = TR.trustRegion(Delta_0, Delta_max, epsilon, x0, B_0, Matyas, Matyas_grad, 1)     
         
 
 x1_TR, x2_TR = traj(x_list_TR)    
@@ -116,21 +114,34 @@ x1_TR, x2_TR = traj(x_list_TR)
 
         
    
-fig = postProcess2D(xmin, xmax, Nx, ymin, ymax, Ny, Matyas)  
+    
+        
+p3 = CG.CG(Matyas, Matyas_grad, x0, 1)   
+x_list_CG, n_iter_list_CG, log_g_norm_list_CG = p3.optimize(epsilon)
 
-plt.plot(x1_TR, x2_TR, '-rx') 
-plt.plot(x1_LS, x2_LS, '-yo') 
+x1_CG, x2_CG = traj(x_list_CG)   
+        
+        
 
-plt.show()       
+if (1 == 1):        
         
-        
-        
-        
-        
-        
-        
-        
-        
+	fig = postProcess2D(xmin, xmax, Nx, ymin, ymax, Ny, Matyas)  
+
+	plt.plot(x1_LS, x2_LS, '-yo')
+	plt.plot(x1_TR, x2_TR, '-rx') 
+	plt.plot(x1_CG, x2_CG, '-g*')  
+
+if (1 == 1):
+
+	plt.figure()
+
+	plt.plot(n_iter_list_LS, log_g_norm_list_LS,'-yo')
+	plt.plot(n_iter_list_TR, log_g_norm_list_TR,'-rx')
+	plt.plot(n_iter_list_CG, log_g_norm_list_CG,'-g*')
+
+
+
+plt.show()           
            
         
         

@@ -170,11 +170,9 @@ def trustRegion(Delta_0, Delta_max, epsilon, x_0, B_0, f, g, mode):
             
             log_g_norm_list.append(np.log10(gk_norm_list[ii]))
         
-        #plt.plot(n_iter_list, log_g_norm_list, '-o')
         
-        #plt.show()
 
-        return x_list, gk_norm_list
+        return x_list, n_iter_list, log_g_norm_list
 
 	if (mode == 0):
 

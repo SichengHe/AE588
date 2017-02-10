@@ -203,6 +203,15 @@ class BFGS(object):
                 self.log_g_norm_list.append(np.log10(self.g_norm_list[i]))
 
             return self.x_list, self.n_iter_list, self.log_g_norm_list
+
+        if (self.mode == 0):
+
+            f = self.f
+
+            x_star = self.x_list[-1]
+            J = f(x_star)
+
+            return x_star, J
             
 
             
