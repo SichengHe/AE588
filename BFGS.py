@@ -4,109 +4,7 @@ import copy
 #import pylab as pylab
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
-
-
-mu1 = 1e-4
-mu2 = 0.9
-
-def lineSearch(f, g, x0, pk, alpha_1, alpha_max):
-    
-    alpha = []
-    alpha = [0.0, alpha_1]
-    
-    phi_alpha_0 = f(x0)
-    dphi_dalpha_0 = np.transpose(g(x0)).dot(pk)[0,0]
-    
-    i = 1
-    while (1 == 1):
-        
-        print("i:",i)
-        
-        if (i >= 100):
-            break
-        
-        x = x0 + alpha[i] * pk
-        
-        phi_alpha_i = f(x)
-        
-        if (phi_alpha_i > phi_alpha_0 + mu1 * alpha[i] * dphi_dalpha_0\
-           or (alpha[i]>alpha[i-1] and i>1)):
-            
-            print("alpha[i-1], alpha[i]", alpha[i-1], alpha[i])
-            
-            alpha_star = zoom(alpha[i-1], alpha[i], f, g, x0, pk)
-            
-            return alpha_star
-        
-        dphi_dalpha_i = np.transpose(g(x0 + alpha[i]*pk)).dot(pk)[0,0]
-        
-        if (abs(dphi_dalpha_i) <= - mu2 * dphi_dalpha_0):
-            
-            return alpha[i]
-        
-        elif (dphi_dalpha_i >= 0.0):
-            
-            print("alpha[i], alpha[i-1]", alpha[i], alpha[i-1])
-            
-            alpha_star = zoom(alpha[i], alpha[i-1], f, g, x0, pk)
-            
-            return alpha_star
-        
-        else:
-            
-            alpha_new = 0.5 * (alpha_max + alpha[i])
-            alpha.append(alpha_new)
-            
-        i += 1
-        
-        
-        
-def zoom(alpha_low, alpha_high, f, g, x0, pk):
-    
-    j = 0
-    
-    alpha = []
-    
-    phi_0 = f(x0)
-    dphi_dalpha_0 = np.transpose(g(x0)).dot(pk)[0,0]
-    
-    while (1 == 1):
-        
-        print("alpha_low, alpha_high", alpha_low, alpha_high)
-        
-        print("j:",j+1)
-        
-        if (j >= 100):
-            break
-        
-        alpha_j = (alpha_low + alpha_high)/2.0
-        alpha.append(alpha_j)
-        
-        phi_alpha_j = f(x0 + alpha[j]*pk)
-        
-        if (phi_alpha_j > phi_0 + mu1 * alpha[j] * dphi_dalpha_0\
-           or phi_alpha_j > f(x0 + alpha_low*pk)):
-            
-            alpha_high = alpha[j]
-            
-        else:
-            
-            dphi_dalpha_j = np.transpose(g(x0 + alpha[j]*pk)).dot(pk)[0,0]
-
-            if (abs(dphi_dalpha_j) <= -mu2*dphi_dalpha_0):
-                
-                alpha_star = alpha[j]
-                
-                return alpha_star
-            
-            elif (dphi_dalpha_j * (alpha_high - alpha_low) >= 0):
-                
-                alpha_high = alpha_low
-                
-            alpha_low = alpha[j]
-            
-        j += 1
-
+import linesearch as LS
 
 class BFGS(object):
     
@@ -174,7 +72,7 @@ class BFGS(object):
         g_k = self.gradDescentDir()
         
         # line search
-        alpha_star = lineSearch(f, g, x_k, -g_k, alpha_1, alpha_max)
+        alpha_star = LS.lineSearch(f, g, x_k, -g_k, alpha_1, alpha_max)
         
         # get the new point and its corresponding gradient 
         x_kp1 = x_k + alpha_star * (-g_k)
@@ -250,7 +148,7 @@ class BFGS(object):
         
         x_k = self.x_list[-1]
         
-        alpha_star = lineSearch(f, g, x_k, p_k, alpha_1, alpha_max)
+        alpha_star = LS.lineSearch(f, g, x_k, p_k, alpha_1, alpha_max)
         
         x_kp1 = x_k + alpha_star * p_k
         g_kp1 = g(x_kp1)
@@ -348,74 +246,3 @@ class BFGS(object):
         plt.plot(xx_list, xy_list, '-yo')
         
         plt.show()
-        
-        
-        
-        
-        
-def Matyas(x):
-    
-    x1 = x[0, 0]
-    x2 = x[1, 0]
-    
-    return 0.26 * (x1**2 + x2**2) - 0.48 * x1 * x2
-
-
-def Matyas_grad(x):
-    
-    x1 = x[0, 0]
-    x2 = x[1, 0]
-    
-    dfdx1 = 0.52 * x1 - 0.48 * x2
-    dfdx2 = 0.52 * x2 - 0.48 * x1
-    
-    return np.matrix([[dfdx1],[dfdx2]])
-
-V0 = np.matrix(np.eye(2))         
-x0 = np.matrix(np.zeros((2,1)))
-x0[0, 0] = 1.0
-x0[1, 0] = 0.3
-dim_N = 2
-
-xmin = -1.0
-xmax = 1.0
-ymin = -1.0
-ymax = 1.0
-Nx = 100
-Ny = 100
-            
-p1 = BFGS(Matyas, Matyas_grad, x0, V0, dim_N)
-p1.optimize(10**-12)
-p1.postProcess2D(xmin, xmax, Nx, ymin, ymax, Ny)
-            
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-
-        
-
-        
-        
-    
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-           
-        
-        
-
